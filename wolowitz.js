@@ -2,7 +2,7 @@
 *Wolowitz - A self titled HTML5 video player that i wrote for Apollo II.
 *@author pozy<masikapolycarp@gmail.com
 */
-(function () {
+(function (w) {
   var Utils = {
     listenEvent: function (evtName, evtTarget, evtFunction) {
       if(window.addEventListener) evtTarget.addEventListener(evtName, evtFunction, false);
@@ -194,21 +194,17 @@
       this.insertPoster();
       return;
     }
-    
+
     //buffering
       setInterval(function () {
           var bufferedEnd = video.buffered.end(video.buffered.length - 1);
           this.getElementsByClassName("track")[0].style.width = ((bufferedEnd / video.duration) * 100) + "%";
       }.bind(this),300);
-    
+
     video.classList.add("ww-video");
     this.innerHTML = this.innerHTML + this.generateControls();
     this.fireControls();
   }
-
-  window.addEventListener('DOMContentLoaded', function () {
-   new Wolowitz({
-       selector: ".ww-element"
-   });
-  })
-})();
+  //
+  w.Wolowitz = Wolowitz;
+})(typeof exports !== "undefined" ? exports : typeof window !== "undefined" ? window : this);
