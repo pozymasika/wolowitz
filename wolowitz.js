@@ -61,21 +61,14 @@
   }
   //
   Element.prototype.generateControls = function () {
-    return '<div id="controls" data-ww-controls="true">' +
-              '<div  class="pr">' +
-                '<div class="progress">' +
-                  '<span class="track"></span>' +
-                '</div>' +
-              '</div>' +
-              '<ul data-ww-controls="true">' +
-              '<li class="play-button control" title="Play/Pause" data-ww-command="play"></li>' +
-              '<li class="length">00:00</li>' +
-              '<li><input type="range" id="progress" class="ww-track control" value="0" data-ww-command="progress"></li>' +
-              '<li class="volume_up vol control" data-ww-command="v_up"></li>' +
-              '<li class="volume_down vol control" data-ww-command="v_down"></li>' +
-              '<li class="fullscreen-button control" data-ww-command="fullscreen"></li>' +
-              '<li class="elapsed">00:00</li>' +
-          '</div>';
+    return '<div class="controls">' +
+                '<span class="control icon-play" data-ww-command="play"></span>' +
+                '<span class="length">00:00</span>' +
+                '<span class="control ww-track" data-ww-command="progress"> <span class="track"></span> </span>' +
+                '<span class="icon-vol"></span>' +
+                '<span class="control icon-volume" data-ww-command="v_change"><span class="track"></span></span>' +
+                '<span class="control icon-fullscreen" data-ww-command="fullscreen"></span>' +
+           '</div>';
   }
   Element.prototype.fireControls = function () {
     var video = this.getElementsByClassName("ww-video")[0];
@@ -88,7 +81,7 @@
             video.pause();
         }
         //
-	       this.getElementsByClassName("play-button")[0].classList.toggle("pause-button");
+	       this.getElementsByClassName("icon-play")[0].classList.toggle("icon-pause");
       }.bind(this),
       goFullScreen: function (e) {
         (function requestFullScreen (e) {
@@ -98,49 +91,47 @@
         })(e);
       },
       onMarkerChange: function (e) {
-        var percentage = e.target.value,
-           temp_time;
-       //
-       temp_time = (percentage * video.duration) / 100;
+       var time = e.offsetX / e.target.offsetWidth * video.duration;
        if(video.currentTime) video.pause();
-       video.currentTime = temp_time;
+       video.currentTime = time;
        video.play();
       },
-      onVolumeUp: function (e) {
-        if(video.volume === 1) return;
-            video.volume += 0.1;
-      },
-      onVolumeDown: function (e) {
-       if(video.volume <= 1 && video.volume > 0.1 ) video.volume -= 0.1;
-     },
+     volumeChange: function (e) {
+       var target = e.target.getAttribute("data-ww-command") ? e.target.getElementsByClassName("track")[0] : e.target;
+       if(this.getElementsByClassName("icon-vol")[0].classList.contains("icon-mute")) {
+         this.getElementsByClassName("icon-vol")[0].classList.remove("icon-mute");
+       }
+       video.volume = e.offsetX / e.target.offsetWidth;
+       target.style.width = (video.volume * 100) + '%';
+     }.bind(this),
      onTimeUpdate: function (e) {
        var elapsed = video.duration - video.currentTime;
-       var used_time = video.currentTime;
-       // the crazy timeFormat function loss about 1300 milli-seconds
-       //so recover that here -> 1.3
-       //no one will notice that
-       var used_format = Utils.timeFormat(used_time + 1.3);
        var time = Utils.timeFormat(elapsed);
        var time_format = [time.hours,time.minutes,time.seconds].join(':');
        //
-       this.updateProgress.call(this, used_format, time_format);
+       this.updateProgress.call(this, time_format);
        //
      }.bind(this),
      onSpeedChange: function (e) {
          video.playbackRate = e.target.value;
-     }
-    };
+     },
+     toggleMute: function (e) {
+       e.target.classList.toggle("icon-mute");
+       video.volume = 0;
+       //return volume to initial state if already muted
+       if(!e.target.classList.contains("icon-mute")) {
+         video.volume = parseInt(getComputedStyle(this.getElementsByClassName("icon-volume")[0].children[0]).width) / 100;
+       }
+     }.bind(this)
+   };
     //
     for(var control = 0; control < controls.length; ++control) {
       switch(controls[control].getAttribute("data-ww-command")) {
         case "play":
           Utils.listenEvent("click", controls[control], events.onDoubleTap);
         break;
-        case "v_up":
-          Utils.listenEvent("click", controls[control], events.onVolumeUp);
-        break;
-        case "v_down":
-          Utils.listenEvent("click", controls[control], events.onVolumeDown);
+        case "v_change":
+          Utils.listenEvent("click", controls[control], events.volumeChange);
         break;
         case "fullscreen":
           Utils.listenEvent("click", controls[control], events.goFullScreen);
@@ -151,6 +142,7 @@
       }
     }
     //
+    Utils.listenEvent("click", this.getElementsByClassName("icon-vol")[0], events.toggleMute);
     Utils.listenEvent("dblclick", video, events.onDoubleTap);
     Utils.listenEvent("timeupdate", video, events.onTimeUpdate);
     Utils.listenEvent("error", video, function (e) {
@@ -168,17 +160,14 @@
   Element.prototype.notify = function (message) {
       //TODO!
   }
-  Element.prototype.updateProgress = function (used_format, time_format) {
+  Element.prototype.updateProgress = function (time_format) {
     var lengthEl = this.getElementsByClassName("length")[0];
-    var elapsedEl = this.getElementsByClassName("elapsed")[0];
     var progress = this.getElementsByClassName("ww-track")[0];
     var videoEl = this.getElementsByClassName('ww-video')[0];
     var percentage = Math.round((videoEl.currentTime / videoEl.duration) * 100);
     //
     lengthEl.innerHTML = time_format;
-    elapsedEl.innerHTML = '-' + [used_format.hours,used_format.minutes,used_format.seconds].join(':');
-    progress.value = percentage;
-
+    progress.getElementsByClassName("track")[0].style.width = percentage + '%';
   }
   Element.prototype.Wolowitz = function () {
     var videoSource = this.getAttribute("src");
@@ -198,7 +187,7 @@
     //buffering
       setInterval(function () {
           var bufferedEnd = video.buffered.end(video.buffered.length - 1);
-          this.getElementsByClassName("track")[0].style.width = ((bufferedEnd / video.duration) * 100) + "%";
+          //this.getElementsByClassName("track")[0].style.width = ((bufferedEnd / video.duration) * 100) + "%";
       }.bind(this),300);
 
     video.classList.add("ww-video");

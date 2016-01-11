@@ -1,0 +1,96 @@
+/* For the video */
+video,.ww-error {
+    height: 70%;
+    margin: .5% .5% 1% 1%;
+    width: 98%;
+}
+video:hover ~ div.controls {
+ opacity: 1;
+}
+/*Syncs the opacity change with th video hover*/
+div.controls:hover {
+ opacity: 1;
+}
+div.controls {
+      display: -webkit-flex;
+      display: flex;
+      background: -webkit-linear-gradient(to bottom, #ccc, #fff);
+      background:         linear-gradient(to bottom, #ccc, #fff);
+      box-shadow: 0 0 15px #e9e9e9;
+      flex-flow: row;
+      -webkit-flex-flow: row;
+      min-height: 47px;
+      font: .9em Helvetica;
+      max-width: 97%;
+      position: relative;
+      margin:-9% 0 0 1.5%;
+      opacity: 0;
+      transition: opacity .4s ease-out;
+}
+div.controls > span {
+        margin: 10px 5px;
+        cursor: pointer;
+}
+div.controls > span.length { margin-top: 13px; }
+div.controls > span.icon-play, div.controls > span.icon-vol, div.controls > span.icon-pause,  div.controls > span.icon-fullscreen {
+        flex: 1 1 auto;
+        max-height: 25px;
+        max-width: 25px;
+}
+
+div.controls > span.icon-play {
+        background: url(icons/mdav.svg) 0 0 no-repeat;
+}
+div.controls > span.icon-pause {
+        background: url(icons/mdav.svg) 37% 62% no-repeat;
+}
+div.controls > span.icon-fullscreen {
+        background: url(icons/mdav.svg) 13% 0 no-repeat;
+}
+div.controls > span.icon-vol {
+        background: url(icons/mdav.svg) 100% 75% no-repeat;
+}
+div.controls > span.icon-mute {
+        background: url(icons/mdav.svg) 100% 63% no-repeat;
+}
+div.controls > span.ww-track {
+        background: #fff;
+        flex: 3 1 30%;
+        border-radius: 7pt;
+        height: 14px;
+        margin-top: 14px;
+}
+div.controls > span.icon-volume {
+        background: #fff;
+        flex: 1 1 20%;
+        border-radius: 7pt;
+        height: 14px;
+        margin-top: 14px;
+}
+div.controls > span.ww-track .track, div.controls > span.icon-volume .track {
+        border-radius: 7pt;
+        display: block;
+        position: relative;
+        height:98%;
+        width: 0%;
+        background: linear-gradient(to bottom, rgba(0, 100, 200, .5), rgba(0, 100, 200, 1));
+       transition: width 1s ease-out;
+}
+div.controls > span.icon-volume .track { width: 50% }
+@media all and (max-width: 640px) {
+        div.controls > span.length, div.controls > span.elapsed, div.controls> span.icon-volume {
+                display: none;
+        }
+        div.controls > span.progress {
+                flex: 3 1 40%;
+        }
+}
+@media all and (max-width: 800px) {
+        div.controls > span.progress {
+                flex: 1 1 40%;
+        }
+}
+#vid img{
+    width : 100%;
+    height: 89%;
+}
